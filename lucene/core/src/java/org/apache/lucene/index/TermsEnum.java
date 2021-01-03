@@ -114,6 +114,22 @@ public abstract class TermsEnum implements BytesRefIterator {
   public abstract int docFreq() throws IOException;
 
   /**
+   * Returns the first docId of documents containing the current term. Do not call this when the enum is
+   * unpositioned. {@link SeekStatus#END}.
+   */
+  public int firstDoc() throws IOException {
+      return -1;
+  }
+
+  /**
+   * Returns the last docId of documents containing the current term. Do not call this when the enum is
+   * unpositioned. {@link SeekStatus#END}.
+   */
+  public int lastDoc() throws IOException {
+      return -1;
+  }
+
+  /**
    * Returns the total number of occurrences of this term across all documents (the sum of the
    * freq() for each doc that has this term). Note that, like other term measures, this measure does
    * not take deleted documents into account.

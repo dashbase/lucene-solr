@@ -78,6 +78,8 @@ public abstract class PushPostingsWriterBase extends PostingsWriterBase {
    */
   public abstract void finishTerm(BlockTermState state) throws IOException;
 
+  public static final String INTERVAL_WANTED = "__INTERVAL_WANTED__";
+
   /**
    * Sets the current field for writing, and returns the fixed length of long[] metadata (which is
    * fixed per field), called when the writing switches to another field.
@@ -128,11 +130,17 @@ public abstract class PushPostingsWriterBase extends PostingsWriterBase {
 
     int docFreq = 0;
     long totalTermFreq = 0;
+    int firstDoc = -1;
+    int lastDoc = -1;
     while (true) {
       int docID = postingsEnum.nextDoc();
       if (docID == PostingsEnum.NO_MORE_DOCS) {
         break;
       }
+      if (firstDoc < 0) {
+        firstDoc = docID;
+      }
+      lastDoc = docID;
       docFreq++;
       docsSeen.set(docID);
       int freq;
@@ -169,6 +177,8 @@ public abstract class PushPostingsWriterBase extends PostingsWriterBase {
     } else {
       BlockTermState state = newTermState();
       state.docFreq = docFreq;
+      state.firstDoc = firstDoc;
+      state.lastDoc = lastDoc;
       state.totalTermFreq = writeFreqs ? totalTermFreq : -1;
       finishTerm(state);
       return state;

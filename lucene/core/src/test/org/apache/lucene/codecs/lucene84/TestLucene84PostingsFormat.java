@@ -21,23 +21,23 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.apache.lucene.analysis.MockAnalyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.codecs.Codec;
 import org.apache.lucene.codecs.CompetitiveImpactAccumulator;
+import org.apache.lucene.codecs.PushPostingsWriterBase;
 import org.apache.lucene.codecs.blocktree.FieldReader;
 import org.apache.lucene.codecs.blocktree.Stats;
 import org.apache.lucene.codecs.lucene84.Lucene84ScoreSkipReader.MutableImpactList;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.index.BasePostingsFormatTestCase;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.Impact;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.document.FieldType;
+import org.apache.lucene.index.*;
 import org.apache.lucene.store.ByteArrayDataInput;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.IOContext;
 import org.apache.lucene.store.IndexInput;
 import org.apache.lucene.store.IndexOutput;
+import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.TestUtil;
 
 public class TestLucene84PostingsFormat extends BasePostingsFormatTestCase {
@@ -141,5 +141,83 @@ public class TestLucene84PostingsFormat extends BasePostingsFormatTestCase {
         assertEquals(impacts, impacts2);
       }
     }
+  }
+
+  private void validateInterval(LeafReader reader, String field, String term, int firstDoc, int lastDoc) throws IOException {
+    Terms terms = reader.terms(field);
+    TermsEnum termsEnum = terms.iterator();
+    assertTrue(termsEnum.seekExact(new BytesRef(term)));
+    assertEquals(firstDoc, termsEnum.firstDoc());
+    assertEquals(lastDoc, termsEnum.lastDoc());
+  }
+
+  public void testIntervalIndex() throws Exception {
+    Directory d = newDirectory();
+    try (IndexWriter w = new IndexWriter(d, new IndexWriterConfig(new StandardAnalyzer()))) {
+      FieldType type = new FieldType();
+      type.omitNorms();
+      type.setStored(false);
+      type.setIndexOptions(IndexOptions.DOCS);
+      type.putAttribute(PushPostingsWriterBase.INTERVAL_WANTED, "true");
+      type.freeze();
+
+      for (int i = 0; i < 10; i++) {
+        Document doc = new Document();
+        if ((i & 0x1) == 0) { // even
+          doc.add(newStringField("default", "even", Field.Store.NO));
+          Field f = newField("interval", "even", type);
+          doc.add(f);
+        } else {
+          doc.add(newStringField("default", "odd", Field.Store.NO));
+          Field f = newField("interval", "odd", type);
+          doc.add(f);
+        }
+        w.addDocument(doc);
+      }
+      w.commit();
+      w.forceMerge(1);
+    }
+
+    try (DirectoryReader reader = DirectoryReader.open(d)) {
+      assertEquals(1, reader.leaves().size());
+      LeafReader lreader = reader.leaves().get(0).reader();
+      validateInterval(lreader, "default", "even", -1, -1);
+      validateInterval(lreader, "default", "odd", -1, -1);
+
+      validateInterval(lreader, "interval", "even", 0, 8);
+      validateInterval(lreader, "interval", "odd", 1, 9);
+    }
+
+    d.close();
+  }
+
+  public void testIntervalSingleDocId() throws Exception {
+    Directory d = newDirectory();
+    try (IndexWriter w = new IndexWriter(d, new IndexWriterConfig(new StandardAnalyzer()))) {
+      FieldType type = new FieldType();
+      type.omitNorms();
+      type.setStored(false);
+      type.setIndexOptions(IndexOptions.DOCS);
+      type.putAttribute(PushPostingsWriterBase.INTERVAL_WANTED, "true");
+      type.freeze();
+
+
+      Document doc = new Document();
+      doc.add(newStringField("default", "one", Field.Store.NO));
+      Field f = newField("interval", "one", type);
+      doc.add(f);
+      w.addDocument(doc);
+      w.commit();
+      w.forceMerge(1);
+    }
+
+    try (DirectoryReader reader = DirectoryReader.open(d)) {
+      assertEquals(1, reader.leaves().size());
+      LeafReader lreader = reader.leaves().get(0).reader();
+      validateInterval(lreader, "default", "one", 0, 0);
+      validateInterval(lreader, "interval", "one", 0, 0);
+    }
+
+    d.close();
   }
 }
