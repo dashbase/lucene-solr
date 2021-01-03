@@ -211,7 +211,7 @@ public final class Lucene84PostingsReader extends PostingsReaderBase {
       termState.payStartFP = 0;
     }
 
-    boolean storeIntervals = Boolean.parseBoolean(fieldInfo.getAttribute(PushPostingsWriterBase.INTERVAL_WANTED));
+    boolean storeIntervals = fieldInfo.isIndexPostingsInterval();
     if (version >= VERSION_COMPRESSED_TERMS_DICT_IDS) {
       final long l = in.readVLong();
       if ((l & 0x01) == 0) {

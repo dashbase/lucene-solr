@@ -153,6 +153,8 @@ public final class Lucene90FieldInfosFormat extends FieldInfosFormat {
           boolean storePayloads = (bits & STORE_PAYLOADS) != 0;
           boolean isSoftDeletesField = (bits & SOFT_DELETES_FIELD) != 0;
 
+          boolean isIndexPostingInterval = (bits & STORE_INTERVAL) != 0;
+
           final IndexOptions indexOptions = getIndexOptions(input, input.readByte());
 
           // DV Types are packed in one byte
@@ -196,6 +198,7 @@ public final class Lucene90FieldInfosFormat extends FieldInfosFormat {
                     vectorDimension,
                     vectorDistFunc,
                     isSoftDeletesField);
+            infos[i].setIndexPostingsInterval(isIndexPostingInterval);
             infos[i].checkConsistency();
           } catch (IllegalStateException e) {
             throw new CorruptIndexException(
@@ -337,6 +340,12 @@ public final class Lucene90FieldInfosFormat extends FieldInfosFormat {
         if (fi.omitsNorms()) bits |= OMIT_NORMS;
         if (fi.hasPayloads()) bits |= STORE_PAYLOADS;
         if (fi.isSoftDeletesField()) bits |= SOFT_DELETES_FIELD;
+        if (fi.isIndexPostingsInterval()) {
+          bits |= STORE_INTERVAL;
+          System.out.println("INDEXING INTERVAL SET FOR: " + fi.name);
+        } else {
+          System.out.println("INDEXING INTERVAL NOT SET FOR: " + fi.name);
+        }
         output.writeByte(bits);
 
         output.writeByte(indexOptionsByte(fi.getIndexOptions()));
@@ -372,4 +381,7 @@ public final class Lucene90FieldInfosFormat extends FieldInfosFormat {
   static final byte OMIT_NORMS = 0x2;
   static final byte STORE_PAYLOADS = 0x4;
   static final byte SOFT_DELETES_FIELD = 0x8;
+
+  // custome bits, setting from left to right to avoid collision in the future
+  static final byte STORE_INTERVAL = (byte)0x80;
 }

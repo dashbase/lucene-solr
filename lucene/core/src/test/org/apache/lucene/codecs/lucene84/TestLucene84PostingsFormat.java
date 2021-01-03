@@ -16,15 +16,10 @@
  */
 package org.apache.lucene.codecs.lucene84;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import org.apache.lucene.analysis.MockAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.codecs.Codec;
 import org.apache.lucene.codecs.CompetitiveImpactAccumulator;
-import org.apache.lucene.codecs.PushPostingsWriterBase;
 import org.apache.lucene.codecs.blocktree.FieldReader;
 import org.apache.lucene.codecs.blocktree.Stats;
 import org.apache.lucene.codecs.lucene84.Lucene84ScoreSkipReader.MutableImpactList;
@@ -32,13 +27,14 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.FieldType;
 import org.apache.lucene.index.*;
-import org.apache.lucene.store.ByteArrayDataInput;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.IOContext;
-import org.apache.lucene.store.IndexInput;
-import org.apache.lucene.store.IndexOutput;
+import org.apache.lucene.store.*;
 import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.TestUtil;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class TestLucene84PostingsFormat extends BasePostingsFormatTestCase {
   private final Codec codec = TestUtil.alwaysPostingsFormat(new Lucene84PostingsFormat());
@@ -158,7 +154,7 @@ public class TestLucene84PostingsFormat extends BasePostingsFormatTestCase {
       type.omitNorms();
       type.setStored(false);
       type.setIndexOptions(IndexOptions.DOCS);
-      type.putAttribute(PushPostingsWriterBase.INTERVAL_WANTED, "true");
+      type.setIndexPostingInterval(true);
       type.freeze();
 
       for (int i = 0; i < 10; i++) {
@@ -198,7 +194,7 @@ public class TestLucene84PostingsFormat extends BasePostingsFormatTestCase {
       type.omitNorms();
       type.setStored(false);
       type.setIndexOptions(IndexOptions.DOCS);
-      type.putAttribute(PushPostingsWriterBase.INTERVAL_WANTED, "true");
+      type.setIndexPostingInterval(true);
       type.freeze();
 
 

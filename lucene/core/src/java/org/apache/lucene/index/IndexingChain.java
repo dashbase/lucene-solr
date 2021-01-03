@@ -962,6 +962,9 @@ final class IndexingChain implements Accountable {
 
       FieldInfo fi = fieldInfos.getOrAdd(name);
       initIndexOptions(fi, fieldType.indexOptions());
+
+      fi.setIndexPostingsInterval(fieldType.isIndexPostingInterval());
+
       Map<String, String> attributes = fieldType.getAttributes();
       if (attributes != null) {
         attributes.forEach((k, v) -> fi.putAttribute(k, v));

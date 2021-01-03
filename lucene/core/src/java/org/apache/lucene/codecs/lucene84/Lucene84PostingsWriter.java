@@ -481,7 +481,7 @@ public final class Lucene84PostingsWriter extends PushPostingsWriterBase {
   public void encodeTerm(
       DataOutput out, FieldInfo fieldInfo, BlockTermState _state, boolean absolute)
       throws IOException {
-    boolean storeIntervals = Boolean.parseBoolean(fieldInfo.getAttribute(INTERVAL_WANTED));
+    boolean storeIntervals = fieldInfo.isIndexPostingsInterval();
     IntBlockTermState state = (IntBlockTermState) _state;
     if (absolute) {
       lastState = emptyState;

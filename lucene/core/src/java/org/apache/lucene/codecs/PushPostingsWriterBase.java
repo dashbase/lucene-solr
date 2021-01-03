@@ -78,8 +78,6 @@ public abstract class PushPostingsWriterBase extends PostingsWriterBase {
    */
   public abstract void finishTerm(BlockTermState state) throws IOException;
 
-  public static final String INTERVAL_WANTED = "__INTERVAL_WANTED__";
-
   /**
    * Sets the current field for writing, and returns the fixed length of long[] metadata (which is
    * fixed per field), called when the writing switches to another field.
