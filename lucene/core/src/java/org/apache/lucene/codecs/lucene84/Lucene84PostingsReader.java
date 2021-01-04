@@ -31,6 +31,7 @@ import java.util.Arrays;
 import org.apache.lucene.codecs.BlockTermState;
 import org.apache.lucene.codecs.CodecUtil;
 import org.apache.lucene.codecs.PostingsReaderBase;
+import org.apache.lucene.codecs.PushPostingsWriterBase;
 import org.apache.lucene.codecs.lucene84.Lucene84PostingsFormat.IntBlockTermState;
 import org.apache.lucene.index.FieldInfo;
 import org.apache.lucene.index.Impacts;
@@ -210,14 +211,21 @@ public final class Lucene84PostingsReader extends PostingsReaderBase {
       termState.payStartFP = 0;
     }
 
+    boolean storeIntervals = fieldInfo.isIndexPostingsInterval();
     if (version >= VERSION_COMPRESSED_TERMS_DICT_IDS) {
       final long l = in.readVLong();
       if ((l & 0x01) == 0) {
         termState.docStartFP += l >>> 1;
         if (termState.docFreq == 1) {
           termState.singletonDocID = in.readVInt();
+          termState.firstDoc = termState.singletonDocID;
+          termState.lastDoc = termState.singletonDocID;
         } else {
           termState.singletonDocID = -1;
+          if (storeIntervals) {
+            termState.firstDoc = in.readVInt();
+            termState.lastDoc = in.readVInt();
+          }
         }
       } else {
         assert absolute == false;
@@ -237,6 +245,8 @@ public final class Lucene84PostingsReader extends PostingsReaderBase {
     if (version < VERSION_COMPRESSED_TERMS_DICT_IDS) {
       if (termState.docFreq == 1) {
         termState.singletonDocID = in.readVInt();
+        termState.firstDoc = termState.singletonDocID;
+        termState.lastDoc = termState.singletonDocID;
       } else {
         termState.singletonDocID = -1;
       }

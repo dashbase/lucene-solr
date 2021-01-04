@@ -45,6 +45,8 @@ public class FieldType implements IndexableFieldType {
   private VectorValues.SearchStrategy vectorSearchStrategy = VectorValues.SearchStrategy.NONE;
   private Map<String, String> attributes;
 
+  private boolean indexPostingInterval;
+
   /** Create a new mutable FieldType with all of the properties from <code>ref</code> */
   public FieldType(IndexableFieldType ref) {
     this.stored = ref.stored();
@@ -64,6 +66,7 @@ public class FieldType implements IndexableFieldType {
     if (ref.getAttributes() != null) {
       this.attributes = new HashMap<>(ref.getAttributes());
     }
+    this.indexPostingInterval = ref.isIndexPostingInterval();
     // Do not copy frozen!
   }
 
@@ -254,6 +257,29 @@ public class FieldType implements IndexableFieldType {
   public void setOmitNorms(boolean value) {
     checkIfFrozen();
     this.omitNorms = value;
+  }
+
+  /**
+   * Set to <code>true</code> to index postings range for the field.
+   *
+   * @param value true if this field should index postings ranges.
+   * @throws IllegalStateException if this FieldType is frozen against future modifications.
+   * @see #isIndexPostingInterval()
+   */
+  public void setIndexPostingInterval(boolean value) {
+    checkIfFrozen();
+    this.indexPostingInterval = value;
+  }
+
+  /**
+   *
+   * <p>The default is <code>false</code>.
+   *
+   * @see #setIndexPostingInterval(boolean)
+   */
+  @Override
+  public boolean isIndexPostingInterval() {
+    return this.indexPostingInterval;
   }
 
   /**

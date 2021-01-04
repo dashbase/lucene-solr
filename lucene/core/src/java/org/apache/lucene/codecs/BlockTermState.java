@@ -31,6 +31,9 @@ public class BlockTermState extends OrdTermState {
   /** total number of occurrences of this term */
   public long totalTermFreq;
 
+  public int firstDoc = -1;
+  public int lastDoc = -1;
+
   /** the term's ord in the current block */
   public int termBlockOrd;
   /** fp into the terms dict primary file (_X.tim) that holds this term */

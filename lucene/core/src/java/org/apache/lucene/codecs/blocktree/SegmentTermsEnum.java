@@ -1116,6 +1116,24 @@ final class SegmentTermsEnum extends BaseTermsEnum {
   }
 
   @Override
+  public int firstDoc() throws IOException {
+    assert !eof;
+    // if (DEBUG) System.out.println("BTR.firstDoc");
+    currentFrame.decodeMetaData();
+    // if (DEBUG) System.out.println("  return " + currentFrame.state.firstDoc);
+    return currentFrame.state.firstDoc;
+  }
+
+  @Override
+  public int lastDoc() throws IOException {
+    assert !eof;
+    // if (DEBUG) System.out.println("BTR.lastDoc");
+    currentFrame.decodeMetaData();
+    // if (DEBUG) System.out.println("  return " + currentFrame.state.lastDoc);
+    return currentFrame.state.lastDoc;
+  }
+
+  @Override
   public long totalTermFreq() throws IOException {
     assert !eof;
     currentFrame.decodeMetaData();

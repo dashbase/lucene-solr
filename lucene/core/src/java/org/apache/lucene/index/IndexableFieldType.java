@@ -113,4 +113,8 @@ public interface IndexableFieldType {
    * @return Map
    */
   Map<String, String> getAttributes();
+
+  default boolean isIndexPostingInterval() {
+    return false;
+  }
 }

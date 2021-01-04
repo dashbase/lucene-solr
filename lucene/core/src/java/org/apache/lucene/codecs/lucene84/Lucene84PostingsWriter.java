@@ -481,6 +481,7 @@ public final class Lucene84PostingsWriter extends PushPostingsWriterBase {
   public void encodeTerm(
       DataOutput out, FieldInfo fieldInfo, BlockTermState _state, boolean absolute)
       throws IOException {
+    boolean storeIntervals = fieldInfo.isIndexPostingsInterval();
     IntBlockTermState state = (IntBlockTermState) _state;
     if (absolute) {
       lastState = emptyState;
@@ -501,6 +502,13 @@ public final class Lucene84PostingsWriter extends PushPostingsWriterBase {
       out.writeVLong((state.docStartFP - lastState.docStartFP) << 1);
       if (state.singletonDocID != -1) {
         out.writeVInt(state.singletonDocID);
+        state.firstDoc = state.singletonDocID;
+        state.lastDoc = state.singletonDocID;
+      } else {
+        if (storeIntervals) {
+          out.writeVInt(state.firstDoc);
+          out.writeVInt(state.lastDoc);
+        }
       }
     }
 

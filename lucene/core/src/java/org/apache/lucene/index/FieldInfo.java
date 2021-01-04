@@ -60,6 +60,8 @@ public final class FieldInfo {
   // whether this field is used as the soft-deletes field
   private final boolean softDeletesField;
 
+  private boolean indexPostingsInterval = false;
+
   /**
    * Sole constructor.
    *
@@ -107,6 +109,14 @@ public final class FieldInfo {
     this.vectorSearchStrategy = vectorSearchStrategy;
     this.softDeletesField = softDeletesField;
     this.checkConsistency();
+  }
+
+  public void setIndexPostingsInterval(boolean indexPostingsInterval) {
+    this.indexPostingsInterval = indexPostingsInterval;
+  }
+
+  public boolean isIndexPostingsInterval() {
+    return this.indexPostingsInterval;
   }
 
   /** Performs internal consistency checks. Always returns true (or throws IllegalStateException) */
