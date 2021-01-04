@@ -340,12 +340,8 @@ public final class Lucene90FieldInfosFormat extends FieldInfosFormat {
         if (fi.omitsNorms()) bits |= OMIT_NORMS;
         if (fi.hasPayloads()) bits |= STORE_PAYLOADS;
         if (fi.isSoftDeletesField()) bits |= SOFT_DELETES_FIELD;
-        if (fi.isIndexPostingsInterval()) {
-          bits |= STORE_INTERVAL;
-          System.out.println("INDEXING INTERVAL SET FOR: " + fi.name);
-        } else {
-          System.out.println("INDEXING INTERVAL NOT SET FOR: " + fi.name);
-        }
+        if (fi.isIndexPostingsInterval()) bits |= STORE_INTERVAL;
+
         output.writeByte(bits);
 
         output.writeByte(indexOptionsByte(fi.getIndexOptions()));

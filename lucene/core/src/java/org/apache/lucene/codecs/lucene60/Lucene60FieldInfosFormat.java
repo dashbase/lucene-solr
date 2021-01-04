@@ -345,7 +345,6 @@ public final class Lucene60FieldInfosFormat extends FieldInfosFormat {
         if (fi.omitsNorms()) bits |= OMIT_NORMS;
         if (fi.hasPayloads()) bits |= STORE_PAYLOADS;
         if (fi.isSoftDeletesField()) bits |= SOFT_DELETES_FIELD;
-
         if (fi.isIndexPostingsInterval()) bits |= STORE_INTERVAL;
 
         output.writeByte(bits);
